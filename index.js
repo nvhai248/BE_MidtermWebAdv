@@ -6,7 +6,7 @@ const app = express();
 const port = process.env.PORT;
 
 // connect to db
-require("./configs/db/index.db").connect();
+require("./src/configs/db/index.db").connect();
 
 app.use(
   express.urlencoded({
@@ -21,7 +21,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.json());
 
 //implement routers
-require("./routers/index.router")(app);
+require("./src/routers/index.router")(app);
 
 app.use((err, req, res, next) => {
   res
