@@ -12,14 +12,10 @@
             "dest": "/"
         }
     ],
-    "install": {
-        "include": [
-            "package.json",
-            "package-lock.json"
-        ],
-        "ignore": [
-            "devDependencies"
-        ]
+    "functions": {
+        "install-deps": {
+            "handler": "vercel/install-deps.js"
+        }
     },
     "env": {
         "PORT": 3000,
