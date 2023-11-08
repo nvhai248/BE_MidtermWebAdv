@@ -12,11 +12,6 @@
             "dest": "/"
         }
     ],
-    "functions": {
-        "install-deps": {
-            "handler": "vercel/install-deps.js"
-        }
-    },
     "env": {
         "PORT": 3000,
         "SECRET_KEY": "be_midterm_webAdvance",
