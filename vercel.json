@@ -13,7 +13,6 @@
         }
     ],
     "env": {
-        "PORT": 3000,
         "SECRET_KEY": "be_midterm_webAdvance",
         "CONNECTION_STRING": "mongodb+srv://UchatDB:uchat@uchatcluster.deprlqm.mongodb.net/Midterm_Web_Adv",
         "S3BucketName": "web-advance",

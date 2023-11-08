@@ -3,7 +3,7 @@ const bodyParser = require("body-parser");
 require("dotenv").config();
 
 const app = express();
-const port = process.env.PORT;
+const port = 3000;
 
 // connect to db
 require("./src/configs/db/index.db").connect();
