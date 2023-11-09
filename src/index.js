@@ -1,5 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const cors = require("cors");
 require("dotenv").config();
 
 const app = express();
@@ -7,7 +8,7 @@ const port = 3000;
 
 // connect to db
 require("./configs/db/index.db").connect();
-
+app.use(cors());
 app.use(
   express.urlencoded({
     extended: true,

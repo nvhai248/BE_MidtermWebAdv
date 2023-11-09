@@ -10,6 +10,23 @@
         {
             "src": "/(.*)",
             "dest": "src/index.js"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "src/index.js",
+            "methods": [
+                "GET",
+                "POST",
+                "DELETE",
+                "PATCH"
+            ],
+            "headers": [
+                "Origin",
+                "Authorization",
+                "Content-Type"
+            ],
+            "allowCredentials": true,
+            "maxAge": 3600
         }
     ]
 }
