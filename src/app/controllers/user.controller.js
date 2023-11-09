@@ -73,7 +73,9 @@ class USerController {
 
     await userStore.editProfile(username, data);
     const newData = await userStore.findUser(username);
-    res.status(200).send(simpleSuccessResponse(data, newData));
+    res
+      .status(200)
+      .send(simpleSuccessResponse(newData, "Successfully updated profile!"));
   }
 
   // [DELETE] /user/logout
