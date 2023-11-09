@@ -4,7 +4,7 @@
   "description": "back-end for simple web application for web advance course (middle exam)",
   "main": "src/index.js",
   "engines": {
-    "node": "18.x"
+    "node": "14.x"
   },
   "scripts": {
     "build": "node src/index.js",
