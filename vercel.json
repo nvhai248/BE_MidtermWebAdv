@@ -9,12 +9,7 @@
     "routes": [
         {
             "src": "/(.*)",
-            "dest": "src/index.js",
-            "methods": [
-                "*"
-            ],
-            "headers": "*",
-            "allow": "*"
+            "dest": "src/index.js"
         }
     ]
 }
