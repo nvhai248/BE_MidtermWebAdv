@@ -8,6 +8,10 @@ const s3 = require("../../configs/awss3/s3");
 class ImageController {
   // [POST] /upload_img
   uploadImage = async (req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*"); // Allow requests from all origins
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH");
+    res.header("Access-Control-Allow-Headers", "Content-Type");
+
     if (!req.file) {
       res.status(400).send(errorCustom(400, "Uploaded file not found!"));
     }

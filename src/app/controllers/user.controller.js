@@ -17,6 +17,7 @@ class USerController {
     if (!user) {
       res.status(404).send(errorNotFound("User"));
     }
+    delete user.password;
     res.status(200).send(simpleSuccessResponse(user, "ok"));
   }
 
