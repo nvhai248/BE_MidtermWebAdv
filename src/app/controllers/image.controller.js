@@ -8,7 +8,7 @@ const s3 = require("../../configs/awss3/s3");
 class ImageController {
   // [POST] /upload_img
   uploadImage = async (req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*"); // Allow requests from all origins
+    res.header("Access-Control-Allow-Origin", ["http://localhost", "*"]); // Allow requests from all origins
     res.header("Access-Control-Allow-Methods", "*");
     res.header("Access-Control-Allow-Headers", "*");
 

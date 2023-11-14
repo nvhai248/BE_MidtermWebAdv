@@ -10,7 +10,7 @@ const port = 3000;
 require("./configs/db/index.db").connect();
 app.use(
   cors({
-    origin: "*",
+    origin: ["http://localhost", "*"],
     methods: "*",
     allowedHeaders: "*",
   })

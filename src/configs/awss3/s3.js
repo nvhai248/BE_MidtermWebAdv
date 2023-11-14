@@ -11,9 +11,9 @@ const corsParams = {
   CORSConfiguration: {
     CORSRules: [
       {
-        AllowedOrigins: ["*"], // Allow all domains to be accessed
+        AllowedOrigins: ["http://localhost", "*"], // Allow all domains to be accessed
         AllowedHeaders: ["*"], // Allow all headers to be accessed
-        AllowedMethods: ["GET", "PUT", "POST", "DELETE"], // Allow all methods to be accessed
+        AllowedMethods: ["*"], // Allow all methods to be accessed
         MaxAgeSeconds: 3000, // Time interval
       },
     ],
