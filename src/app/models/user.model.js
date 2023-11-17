@@ -20,6 +20,7 @@ const User = new Schema(
       url: String,
       cloud_name: String,
       extension: String,
+      created_by : String
     },
   },
   {

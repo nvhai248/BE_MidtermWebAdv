@@ -1,9 +1,7 @@
 const { errorCustom, errorInternalServer } = require("../views/error");
+const {uploadToS3, isImage, getImageInfo } = require("../utils/image.helper");
 const imageStore = require("../storages/image.store");
 const { simpleSuccessResponse } = require("../views/response_to_client");
-const { isImage, getImageInfo } = require("../utils/image.helper");
-const path = require("path");
-const s3 = require("../../configs/awss3/s3");
 
 class ImageController {
   // [POST] /upload_img
@@ -28,27 +26,18 @@ class ImageController {
     var imageInfo = getImageInfo(buffer, url);
 
     // Upload file to AWS S3
-    s3.upload(
-      {
-        Bucket: process.env.S3BucketName,
-        Key: imageInfo.url,
-        Body: buffer,
-        ACL: "public-read",
-      },
-      (err, result) => {
-        if (err) {
-          return res.status(500).send(errorInternalServer(err.message));
-        }
+    if(uploadToS3(imageInfo, buffer) === true) {
+      // return image information to Client
+      imageInfo.url = process.env.S3Domain + "/" + imageInfo.url;
+      imageInfo.created_by = req.user;
 
-        // return image information to Client
-        imageInfo.url = process.env.S3Domain + "/" + imageInfo.url;
-
-        imageStore.create(imageInfo);
-        res
-          .status(200)
-          .send(simpleSuccessResponse(imageInfo, "Successfully uploaded!"));
-      }
-    );
+      imageStore.create(imageInfo);
+      res
+        .status(200)
+        .send(simpleSuccessResponse(imageInfo, "Successfully uploaded!"));
+    } else {
+      res.status(500).send(errorInternalServer(err.message));
+    }
   };
 }
 

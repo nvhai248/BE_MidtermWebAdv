@@ -1,4 +1,5 @@
 const imageSize = require("image-size");
+const s3 = require("../../configs/awss3/s3");
 
 function isImage(buffer) {
   try {
@@ -21,4 +22,21 @@ function getImageInfo(buffer, url) {
   };
 }
 
-module.exports = { isImage, getImageInfo };
+function uploadToS3(imageInfo, buffer){
+  s3.upload(
+    {
+      Bucket: process.env.S3BucketName,
+      Key: imageInfo.url,
+      Body: buffer,
+      ACL: "public-read",
+    },
+    (err, result) => {
+      if (err) {
+        return false;
+      }
+      return true;
+    }
+  );
+}
+
+module.exports = { isImage, getImageInfo, uploadToS3};

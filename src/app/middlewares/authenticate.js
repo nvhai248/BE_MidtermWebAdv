@@ -47,7 +47,7 @@ module.exports = function Authenticated(req, res, next) {
           }
         }
 
-        req.user = payload.username;
+        req.user = payload;
         next();
       }
     })

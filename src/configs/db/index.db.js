@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 async function connect() {
   try {
     let connectionString = process.env.CONNECTION_STRING
+    console.log(connectionString);
     mongoose.connect(connectionString, {
       useNewUrlParser: true,
       useUnifiedTopology: true,

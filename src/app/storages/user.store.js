@@ -2,9 +2,16 @@ const User = require("../models/user.model");
 const mongooseHelper = require("../utils/mongoose.helper");
 
 class userStore {
-  findUser = async (username) => {
+  findUserByUsername = async (username) => {
     var user = mongooseHelper.mongoosesToObject(
       await User.findOne({ username: username })
+    );
+    return user;
+  };
+
+  findUserById = async (id) => {
+    var user = mongooseHelper.mongoosesToObject(
+      await User.findOne({ _id: id })
     );
     return user;
   };
@@ -14,8 +21,8 @@ class userStore {
     await newUser.save();
   };
 
-  editProfile = async (username, data) => {
-    await User.updateOne({ username: username }, data);
+  editProfile = async (userId, data) => {
+    await User.updateOne({ _id: userId }, data);
   };
 }
 

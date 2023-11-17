@@ -9,6 +9,7 @@ const Image = new Schema(
     height: { type: Number },
     cloud_name: { type: String },
     extension: { type: String },
+    created_by : { type: String },
   },
   {
     collection: "images",

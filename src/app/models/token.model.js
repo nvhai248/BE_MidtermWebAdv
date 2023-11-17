@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 
 const Token = new Schema(
   {
-    username: { type: String },
+    userId: { type: String },
     token: { type: String },
     created_at: { type: String },
   },
