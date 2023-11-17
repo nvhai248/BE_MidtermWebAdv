@@ -8,7 +8,11 @@ const port = 3000;
 
 // connect to db
 require("./configs/db/index.db").connect();
-app.use(cors());
+app.use(cors({
+  origin: ["http://localhost:3000", "*"],
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+  allowedHeaders: "*"
+}));
 app.use(
   express.urlencoded({
     extended: true,
