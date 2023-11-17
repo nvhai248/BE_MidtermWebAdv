@@ -25,6 +25,13 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use(express.json());
 
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*'); // Replace * with specific origin if needed
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  next();
+});
+
 //implement routers
 require("./routers/index.router")(app);
 
