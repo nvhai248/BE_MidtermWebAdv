@@ -14,14 +14,7 @@ const User = new Schema(
     birthday: { type: String },
     social_id: { type: String },
     address: { type: String },
-    image: {
-      width: Number,
-      height: Number,
-      url: String,
-      cloud_name: String,
-      extension: String,
-      created_by : String
-    },
+    image: {type: Object},
   },
   {
     collection: "users",

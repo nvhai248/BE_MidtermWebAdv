@@ -7,7 +7,7 @@ const uploadImage = require("../app/middlewares/uploadImage");
 
 router.delete("/logout", authenticate, userRouter.logout);
 router.patch("/profile", authenticate, userRouter.editProfile);
-router.patch("/image", authenticate, uploadImage, userRouter.editProfile);
+router.patch("/avatar", authenticate, uploadImage, userRouter.updatedAvatar);
 router.get("/profile", authenticate, userRouter.getUser);
 router.post("/register", userRouter.register);
 router.post("/login", userRouter.login);

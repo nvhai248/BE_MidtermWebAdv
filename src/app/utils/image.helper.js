@@ -22,21 +22,26 @@ function getImageInfo(buffer, url) {
   };
 }
 
-function uploadToS3(imageInfo, buffer){
-  s3.upload(
-    {
-      Bucket: process.env.S3BucketName,
-      Key: imageInfo.url,
-      Body: buffer,
-      ACL: "public-read",
-    },
-    (err, result) => {
-      if (err) {
-        return false;
+async function uploadToS3(imageInfo, buffer) {
+  return new Promise((resolve, reject) => {
+    s3.upload(
+      {
+        Bucket: process.env.S3BucketName,
+        Key: imageInfo.url,
+        Body: buffer,
+        ACL: "public-read",
+      },
+      (err, result) => {
+        if (err) {
+          // If there's an error during upload, reject the promise with the error
+          reject(err);
+        } else {
+          // If upload is successful, resolve the promise with the result
+          resolve(result);
+        }
       }
-      return true;
-    }
-  );
+    );
+  });
 }
 
 module.exports = { isImage, getImageInfo, uploadToS3};

@@ -7,7 +7,10 @@ const {
   errorNotFound,
   errorCustom,
   errorBadRequest,
+  errorInternalServer 
 } = require("../views/error");
+const {uploadToS3, isImage, getImageInfo } = require("../utils/image.helper");
+const imageStore = require("../storages/image.store");
 
 class USerController {
   // get all users
@@ -29,7 +32,7 @@ class USerController {
         .status(400)
         .send(errorCustom(400, "Username or password not be blank!"));
     }
-    const existingUser = await userStore.findUser(data.username);
+    const existingUser = await userStore.findUserByUsername(data.username);
     if (existingUser) {
       return res.status(400).send(errorCustom(400, "Username already exists!"));
     }
@@ -51,7 +54,7 @@ class USerController {
         .send(errorCustom(400, "Username or password incorrect!"));
     }
 
-    const token = jwt.generateToken(user._id);
+    const token = jwt.generateToken({userId: user._id});
     // if user re-login save new token
     // else create new token in database
 
@@ -92,8 +95,8 @@ class USerController {
     res.status(200).send(simpleSuccessResponse(null, "Sign out successfully!"));
   }
 
-  // [PATCH] /user/image
-  uploadImage = async (req, res, next) => {
+  // [PATCH] /user/avatar
+  updatedAvatar = async (req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*'); // Replace * with specific origin if needed
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -114,20 +117,21 @@ class USerController {
     var imageInfo = getImageInfo(buffer, url);
 
     // Upload file to AWS S3
-    if(uploadToS3(imageInfo, buffer) === true) {
+    let check = await uploadToS3(imageInfo, buffer); 
+    if(check) {
       // return image information to Client
       imageInfo.url = process.env.S3Domain + "/" + imageInfo.url;
-      imageInfo.created_by = req.body;
+      var userId = req.user;
+      imageInfo.created_by = userId;
 
-      imageStore.create(imageInfo);
-      var user = userStore.findUserById(req.user);
-      user.image = imageInfo;
-      userStore.editProfile(req.user, user);
+      await imageStore.create(imageInfo);
+      await userStore.editProfile(userId, {image: imageInfo});
+      var user = await userStore.findUserById(userId);
       res
         .status(200)
-        .send(simpleSuccessResponse(imageInfo, "Successfully uploaded!"));
+        .send(simpleSuccessResponse(user, "Successfully updated!"));
     } else {
-      res.status(500).send(errorInternalServer(err.message));
+      res.status(500).send(errorInternalServer("Something went wrong when upload image!"));
     }
   };
 }

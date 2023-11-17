@@ -26,7 +26,8 @@ class ImageController {
     var imageInfo = getImageInfo(buffer, url);
 
     // Upload file to AWS S3
-    if(uploadToS3(imageInfo, buffer) === true) {
+    let check = await uploadToS3(imageInfo, buffer);
+    if(check) {
       // return image information to Client
       imageInfo.url = process.env.S3Domain + "/" + imageInfo.url;
       imageInfo.created_by = req.user;
@@ -36,7 +37,7 @@ class ImageController {
         .status(200)
         .send(simpleSuccessResponse(imageInfo, "Successfully uploaded!"));
     } else {
-      res.status(500).send(errorInternalServer(err.message));
+      res.status(500).send(errorInternalServer("Something went wrong when upload image!"));
     }
   };
 }
