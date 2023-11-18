@@ -97,9 +97,9 @@ class USerController {
 
   // [PATCH] /user/avatar
   updatedAvatar = async (req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*'); // Replace * with specific origin if needed
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    // res.setHeader('Access-Control-Allow-Origin', '*'); // Replace * with specific origin if needed
+    // res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
+    // res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
     if (!req.file) {
       res.status(400).send(errorCustom(400, "Uploaded file not found!"));
