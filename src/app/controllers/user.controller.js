@@ -15,7 +15,7 @@ const imageStore = require("../storages/image.store");
 class USerController {
   // get all users
   async getUser(req, res) {
-    var userId = req.user;
+    var userId = req.user.userId;
     const user = await userStore.findUserById(userId);
     if (!user) {
       res.status(404).send(errorNotFound("User"));
@@ -36,6 +36,10 @@ class USerController {
     if (existingUser) {
       return res.status(400).send(errorCustom(400, "Username already exists!"));
     }
+
+    if(!data.role) {
+      data.role = "student";
+    }
     data.password = hasher.encode(data.password);
     userStore.createUser(data);
 
@@ -54,7 +58,7 @@ class USerController {
         .send(errorCustom(400, "Username or password incorrect!"));
     }
 
-    const token = jwt.generateToken({userId: user._id});
+    const token = jwt.generateToken({userId: user._id, role: user.role});
     // if user re-login save new token
     // else create new token in database
 
@@ -68,7 +72,7 @@ class USerController {
 
   // [PATCH] /user/profile
   async editProfile(req, res) {
-    const userId = req.user;
+    const userId = req.user.userId;
     const data = req.body;
 
     if (!userId || !data) {
@@ -121,7 +125,7 @@ class USerController {
     if(check) {
       // return image information to Client
       imageInfo.url = process.env.S3Domain + "/" + imageInfo.url;
-      var userId = req.user;
+      var userId = req.user.userId;
       imageInfo.created_by = userId;
 
       await imageStore.create(imageInfo);

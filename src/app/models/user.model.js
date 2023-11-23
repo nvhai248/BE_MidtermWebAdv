@@ -15,6 +15,7 @@ const User = new Schema(
     social_id: { type: String },
     address: { type: String },
     image: {type: Object},
+    role : { type: String },
   },
   {
     collection: "users",
