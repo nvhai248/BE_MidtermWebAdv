@@ -1,5 +1,7 @@
 const userRouter = require("./user.router");
 const uploadImageRouter = require("./image.router");
+const passport = require("passport");
+const callbackOauthFacebook = require("../app/middlewares/auth.fb");
 
 function Routers(app) {
   app.use("/api/user", userRouter);
@@ -7,6 +9,12 @@ function Routers(app) {
   app.get("/api/", (req, res) => {
     res.send({ message: "Deploy Ok!" });
   });
+  app.get(
+    "/auth/facebook",
+    passport.authenticate("facebook", { scope: ["public_profile", "email"] })
+  );
+
+  app.get("/auth/facebook/callback", callbackOauthFacebook);
 }
 
 module.exports = Routers;
