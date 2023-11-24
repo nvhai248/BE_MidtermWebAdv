@@ -1,41 +1,18 @@
-const passport = require("passport");
-const { simpleSuccessResponse } = require("../views/response_to_client");
 const jwt = require("../../configs/jwt");
+const tokenStore = require("../storages/token.store");
+const { errorInternalServer } = require("../views/error");
+const { simpleSuccessResponse } = require("../views/response_to_client");
 
-module.exports = async function CallbackOAuthFacebook(req, res, next) {
-  passport.authenticate(
-    "facebook",
-    {
-      successMessage: "Login successful!",
-      failureMessage: "Login failed!",
-      successRedirect: "/",
-      failureRedirect: "/",
-    },
-    async (err, user) => {
-      if (err) {
-        return res.status(500).send(errorInternalServer(err));
-      }
-      if (!user) {
-        return res.status(401).send(errorCustom(401, "Unauthorized!"));
-      }
-      req.user = {
-        userId: user._id,
-        role: user.role,
-      };
-
-      jwt.generateToken({
-        userId: user._id,
-        role: user.role,
-      });
-      res.status(200).send(
-        simpleSuccessResponse(
-          jwt.generateToken({
-            userId: user._id,
-            role: user.role,
-          }),
-          "Authorized!"
-        )
-      );
-    }
-  );
-};
+module.exports =async (req, res) => {
+  var token = jwt.generateToken(req.user);
+  try {
+    await tokenStore.createToken({
+      token: token,
+      userId: req.user.userId,
+    });
+    res.status(200).send(simpleSuccessResponse(token, "Sign in with Facebook!"));
+  } catch (err) {
+    res.status(500).send(errorInternalServer(err));
+  }
+  
+}

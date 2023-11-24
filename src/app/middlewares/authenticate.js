@@ -1,9 +1,7 @@
-const passport = require("passport");
-const tokenStore = require("../storages/token.store");
-const { errorCustom, errorInternalServer } = require("../views/error");
-const jwtConfig = require("../../configs/jwt");
-
-
+const passport = require('passport');
+const tokenStore = require('../storages/token.store');
+const { errorCustom, errorInternalServer } = require('../views/error');
+const jwtConfig = require('../../configs/jwt');
 
 module.exports = async function Authenticated(req, res, next) {
   var token = req.header("Authorization");
@@ -13,15 +11,16 @@ module.exports = async function Authenticated(req, res, next) {
 
   const tokenExists = await tokenStore.findTokenByTokenStr(token);
   if (!tokenExists) {
-    return res.status(403).send(errorCustom(401, "Token is expired!"));
+    return res.status(403).send(errorCustom(401, 'Token is expired!'));
   }
 
-  passport.authenticate("jwt", { session: false }, (err, user) => {
+  passport.authenticate('jwt', { session: false }, (err, user) => {
     if (err) {
+      console.error('Error checking token:', err);
       return res.status(500).send(errorInternalServer(err));
     }
     if (!user) {
-      return res.status(401).send(errorCustom(401, "Unauthorized!"));
+      return res.status(401).send(errorCustom(401, 'Unauthorized!'));
     }
     req.user = user; // Set the user in the request object
     next();

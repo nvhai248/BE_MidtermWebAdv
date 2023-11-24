@@ -24,7 +24,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.json());
 
 // implement passport
-require("./configs/passport").setup();
+require("./configs/passport").setup(app);
 //implement routers
 require("./routers/index.router")(app);
 

@@ -1,15 +1,20 @@
 const passport = require("passport");
+const session = require('express-session')
 const userStore = require("../app/storages/user.store");
 const FacebookStrategy = require("passport-facebook").Strategy;
 const JwtStrategy = require("passport-jwt").Strategy;
 const ExtractJwt = require("passport-jwt").ExtractJwt;
+const jwt = require("./jwt"); 
 
 const jwtOptions = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
   secretOrKey: process.env.SECRET_KEY, // Replace with your JWT secret key
 };
 
-function setup() {
+function setup(app) {
+  app.use(passport.initialize());
+
+
   passport.use(
     new JwtStrategy(jwtOptions, async (payload, done) => {
       try {
@@ -36,26 +41,34 @@ function setup() {
       },
       async function (accessToken, refreshToken, profile, done) {
         try {
-          let user = userStore.findUserByFbId(profile.id);
+          let user = await userStore.findUserByFbId(profile.id);
 
           if (user) {
-            done(null, user);
+
+            return done(null, {
+              userId: user._id,
+              role : user.role
+            });
           }
 
-          user = userStore.createUserAndReturn({
+          user = await userStore.createUserAndReturn({
             fb_id: profile.id,
-            name: profile.displayName,
-            email: clientEmail,
+            full_name: profile.displayName,
+            email: profile.emails[0].value,
             image: { url: profile.photos[0].value },
           });
 
-          done(null, user);
+          return done(null, {
+            userId: user._id,
+            role : user.role
+          });
         } catch (error) {
           done(error);
         }
       }
     )
   );
+
 }
 
 module.exports = { setup };
