@@ -11,6 +11,8 @@ const {
 } = require("../views/error");
 const {uploadToS3, isImage, getImageInfo } = require("../utils/image.helper");
 const imageStore = require("../storages/image.store");
+const { sendVerificationEmail, sendRenewPwEmail} = require("../../configs/nodemailer");
+const { generatePassword } = require("../utils/users.helper");
 
 class USerController {
   // get all users
@@ -40,6 +42,8 @@ class USerController {
     if(!data.role) {
       data.role = "student";
     }
+
+    data.is_active = false;
     data.password = hasher.encode(data.password);
     userStore.createUser(data);
 
@@ -138,6 +142,56 @@ class USerController {
       res.status(500).send(errorInternalServer("Something went wrong when upload image!"));
     }
   };
+
+  // [GET] /api/users/verify/:verificationToken
+  activeUser =async (req, res) => {
+    var token = req.params.verificationToken;
+    if(!token) {
+      return res.status(403).send(errorInternalServer("Invalid verification token!"));
+    }
+    var payload = jwt.verifyToken(token);
+    if(!payload) {
+      return res.status(403).send(errorInternalServer("Outdated!"));
+    }
+
+    await userStore.editProfile(payload.userId, {is_active: true});
+    res.status(200).json({message:"User is active!"});
+  }
+
+  // [POST] /api/users/resend-verification
+  resendVerification = async (req, res) => {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(403).send(errorBadRequest(403, "Invalid email!"));
+    }
+
+    var userId = req.user.userId;
+    var verificationToken = jwt.generateVerificationToken({userId: userId});
+
+    sendVerificationEmail(email, verificationToken);
+    res.status(200).json({message: "Resend verification email successfully!"});
+
+  }
+
+  // [POST] /api/users/send-email-renew-pw
+  requireSendEmailRenewPw = (req, res) => {
+    const {username} = req.body;
+
+    if(!username) {
+      return res.status(403).send(errorBadRequest(403, "Invalid email!"));
+    }
+
+    var user = userStore.findUserByUsername(username);
+    if (!user) {
+      return res.status(403).send(errorBadRequest(403, "Username not found!"));
+    }
+
+    var newPw = generatePassword();
+    userStore.editProfile(user._id, { password: newPw });
+    sendRenewPwEmail(user.email, newPw);
+    res.status(200).json({message: "Success send email renew password!"});
+  }
 }
 
 module.exports = new USerController();

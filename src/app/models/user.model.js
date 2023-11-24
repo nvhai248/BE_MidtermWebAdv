@@ -18,6 +18,7 @@ const User = new Schema(
     role: { type: String },
     created_at: { type: String },
     updated_at: { type: String },
+    is_active: { type: Boolean},
   },
   {
     collection: "users",

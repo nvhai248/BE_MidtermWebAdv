@@ -57,6 +57,7 @@ function setup(app) {
             full_name: profile.displayName,
             email: profile.emails[0].value,
             image: { url: profile.photos[0].value },
+            is_active: false,
           });
 
           return done(null, {
@@ -92,6 +93,7 @@ function setup(app) {
       full_name: profile.displayName,
       email: profile.emails[0].value,
       image: { url: profile.photos[0].value },
+      is_active: false,
     });
 
     return done(null, {
