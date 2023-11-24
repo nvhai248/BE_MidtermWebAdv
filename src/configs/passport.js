@@ -4,6 +4,7 @@ const userStore = require("../app/storages/user.store");
 const FacebookStrategy = require("passport-facebook").Strategy;
 const JwtStrategy = require("passport-jwt").Strategy;
 const ExtractJwt = require("passport-jwt").ExtractJwt;
+const GoogleStrategy = require('passport-google-oauth20').Strategy
 const jwt = require("./jwt"); 
 
 const jwtOptions = {
@@ -68,6 +69,39 @@ function setup(app) {
       }
     )
   );
+
+  passport.use(new GoogleStrategy({
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: '/auth/google/callback',
+    profileFields: ['id', 'displayName', 'photos', 'email']
+}, async (accessToken, refreshToken, profile, done) => {
+  try {
+    let user = await userStore.findUserByFbId(profile.id);
+
+    if (user) {
+
+      return done(null, {
+        userId: user._id,
+        role : user.role
+      });
+    }
+
+    user = await userStore.createUserAndReturn({
+      gg_id: profile.id,
+      full_name: profile.displayName,
+      email: profile.emails[0].value,
+      image: { url: profile.photos[0].value },
+    });
+
+    return done(null, {
+      userId: user._id,
+      role : user.role
+    });
+  } catch (error) {
+    done(error);
+  }
+}));
 
 }
 

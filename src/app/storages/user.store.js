@@ -23,6 +23,13 @@ class userStore {
     return user;
   };
 
+  findUserByGgId = async (gg_id) => {
+    var user = mongooseHelper.mongoosesToObject(
+      await User.findOne({ gg_id: gg_id })
+    );
+    return user;
+  };
+
   createUser = async (user) => {
     if (!user.role) {
       user.role = "not_set";

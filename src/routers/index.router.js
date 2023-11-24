@@ -1,7 +1,7 @@
 const userRouter = require("./user.router");
 const uploadImageRouter = require("./image.router");
 const passport = require("passport");
-const oauthFb = require("../app/middlewares/auth.fb")
+const oauthFbAndGg = require("../app/middlewares/auth.fbAndGg")
 
 function Routers(app) {
   app.use("/api/user", userRouter);
@@ -14,14 +14,18 @@ function Routers(app) {
     passport.authenticate("facebook", { scope: ["public_profile", "email"] })
   );
 
-  /* app.get("/auth/facebook/callback",  passport.authenticate(
-    "facebook",
-    { session: false }), (req, res) => {
-      res.status(200).json({ token: req.user });
-    }); */
+  app.get("/auth/facebook/callback",  passport.authenticate(
+    "facebook", { session: false,
+    }),oauthFbAndGg);
 
-    app.get("/auth/facebook/callback",  passport.authenticate(
-      "facebook", { session: false }),oauthFb);
+    app.get(
+      "/auth/google",
+      passport.authenticate("google", { scope: ["profile", "email"] })
+    );
+  
+    app.get("/auth/google/callback",  passport.authenticate(
+      "google", { session: false,
+      }),oauthFbAndGg);
 }
 
 module.exports = Routers;
