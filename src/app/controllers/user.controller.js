@@ -7,11 +7,14 @@ const {
   errorNotFound,
   errorCustom,
   errorBadRequest,
-  errorInternalServer 
+  errorInternalServer,
 } = require("../views/error");
-const {uploadToS3, isImage, getImageInfo } = require("../utils/image.helper");
+const { uploadToS3, isImage, getImageInfo } = require("../utils/image.helper");
 const imageStore = require("../storages/image.store");
-const { sendVerificationEmail, sendRenewPwEmail} = require("../../configs/nodemailer");
+const {
+  sendVerificationEmail,
+  sendRenewPwEmail,
+} = require("../../configs/nodemailer");
 const { generatePassword } = require("../utils/users.helper");
 
 class USerController {
@@ -39,7 +42,7 @@ class USerController {
       return res.status(400).send(errorCustom(400, "Username already exists!"));
     }
 
-    if(!data.role) {
+    if (!data.role) {
       data.role = "student";
     }
 
@@ -62,7 +65,7 @@ class USerController {
         .send(errorCustom(400, "Username or password incorrect!"));
     }
 
-    const token = jwt.generateToken({userId: user._id, role: user.role});
+    const token = jwt.generateToken({ userId: user._id, role: user.role });
     // if user re-login save new token
     // else create new token in database
 
@@ -105,10 +108,6 @@ class USerController {
 
   // [PATCH] /user/avatar
   updatedAvatar = async (req, res, next) => {
-    // res.setHeader('Access-Control-Allow-Origin', '*'); // Replace * with specific origin if needed
-    // res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
-    // res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
     if (!req.file) {
       res.status(400).send(errorCustom(400, "Uploaded file not found!"));
     }
@@ -125,38 +124,42 @@ class USerController {
     var imageInfo = getImageInfo(buffer, url);
 
     // Upload file to AWS S3
-    let check = await uploadToS3(imageInfo, buffer); 
-    if(check) {
+    let check = await uploadToS3(imageInfo, buffer);
+    if (check) {
       // return image information to Client
       imageInfo.url = process.env.S3Domain + "/" + imageInfo.url;
       var userId = req.user.userId;
       imageInfo.created_by = userId;
 
       await imageStore.create(imageInfo);
-      await userStore.editProfile(userId, {image: imageInfo});
+      await userStore.editProfile(userId, { image: imageInfo });
       var user = await userStore.findUserById(userId);
       res
         .status(200)
         .send(simpleSuccessResponse(user, "Successfully updated!"));
     } else {
-      res.status(500).send(errorInternalServer("Something went wrong when upload image!"));
+      res
+        .status(500)
+        .send(errorInternalServer("Something went wrong when upload image!"));
     }
   };
 
   // [GET] /api/users/verify/:verificationToken
-  activeUser =async (req, res) => {
+  activeUser = async (req, res) => {
     var token = req.params.verificationToken;
-    if(!token) {
-      return res.status(403).send(errorInternalServer("Invalid verification token!"));
+    if (!token) {
+      return res
+        .status(403)
+        .send(errorInternalServer("Invalid verification token!"));
     }
     var payload = jwt.verifyToken(token);
-    if(!payload) {
+    if (!payload) {
       return res.status(403).send(errorInternalServer("Outdated!"));
     }
 
-    await userStore.editProfile(payload.userId, {is_active: true});
-    res.status(200).json({message:"User is active!"});
-  }
+    await userStore.editProfile(payload.userId, { is_active: true });
+    res.status(200).json({ message: "User is active!" });
+  };
 
   // [POST] /api/users/resend-verification
   resendVerification = async (req, res) => {
@@ -167,31 +170,70 @@ class USerController {
     }
 
     var userId = req.user.userId;
-    var verificationToken = jwt.generateVerificationToken({userId: userId});
+    var verificationToken = jwt.generateVerificationToken({ userId: userId });
 
-    sendVerificationEmail(email, verificationToken);
-    res.status(200).json({message: "Resend verification email successfully!"});
+    let isSended = await sendVerificationEmail(email, verificationToken);
 
-  }
+    if (!isSended) {
+      return res
+        .status(403)
+        .send(errorCustom(403, "Can't send verification email!"));
+    }
+    res
+      .status(200)
+      .json({ message: "Resend verification email successfully!" });
+  };
 
   // [POST] /api/users/send-email-renew-pw
-  requireSendEmailRenewPw = (req, res) => {
-    const {username} = req.body;
+  requireSendEmailRenewPw = async (req, res) => {
+    const { username } = req.body;
 
-    if(!username) {
+    if (!username) {
       return res.status(403).send(errorBadRequest(403, "Invalid email!"));
     }
 
-    var user = userStore.findUserByUsername(username);
+    var user = await userStore.findUserByUsername(username);
     if (!user) {
       return res.status(403).send(errorBadRequest(403, "Username not found!"));
     }
 
     var newPw = generatePassword();
+
+    let isSended = await sendRenewPwEmail(user.email, newPw);
+
+    if (!isSended) {
+      return res
+        .status(403)
+        .send(errorCustom(403, "Can't send verification email!"));
+    }
+
+    newPw = hasher.encode(newPw);
     userStore.editProfile(user._id, { password: newPw });
-    sendRenewPwEmail(user.email, newPw);
-    res.status(200).json({message: "Success send email renew password!"});
-  }
+
+    res.status(200).json({ message: "Success send email renew password!" });
+  };
+
+  // [PATCH] /api/user/change-pw
+  changePw = async (req, res) => {
+    const { password, newPassword } = req.body;
+
+    const userInfo = req.user;
+
+    var user = await userStore.findUserById(userInfo.userId);
+    if (!user) {
+      return res.status(403).send(errorBadRequest(403, "User not found!"));
+    }
+
+    if (user.password != password) {
+      return res
+        .status(403)
+        .send(errorBadRequest(403, "Password is incorrect!"));
+    }
+
+    newPassword = hasher.encode(newPassword);
+    await userStore.editProfile(userInfo.suerId, newPassword);
+    res.send(200).json({ message: "Password changed successfully!" });
+  };
 }
 
 module.exports = new USerController();

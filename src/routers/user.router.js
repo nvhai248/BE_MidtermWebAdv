@@ -5,8 +5,13 @@ const userRouter = require("../app/controllers/user.controller");
 const authenticate = require("../app/middlewares/authenticate");
 const uploadImage = require("../app/middlewares/uploadImage");
 
+router.patch("/change-pw", authenticate, userRouter.changePw);
 router.post("/send-email-renew-pw", userRouter.requireSendEmailRenewPw);
-router.post("/resend-verification", authenticate, userRouter.resendVerification);
+router.post(
+  "/resend-verification",
+  authenticate,
+  userRouter.resendVerification
+);
 router.get("/verify/:verificationToken", userRouter.activeUser);
 router.delete("/logout", authenticate, userRouter.logout);
 router.patch("/profile", authenticate, userRouter.editProfile);

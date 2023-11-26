@@ -1,15 +1,11 @@
 const { errorCustom, errorInternalServer } = require("../views/error");
-const {uploadToS3, isImage, getImageInfo } = require("../utils/image.helper");
+const { uploadToS3, isImage, getImageInfo } = require("../utils/image.helper");
 const imageStore = require("../storages/image.store");
 const { simpleSuccessResponse } = require("../views/response_to_client");
 
 class ImageController {
   // [POST] /upload_img
   uploadImage = async (req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*'); // Replace * with specific origin if needed
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
     if (!req.file) {
       res.status(400).send(errorCustom(400, "Uploaded file not found!"));
     }
@@ -27,17 +23,19 @@ class ImageController {
 
     // Upload file to AWS S3
     let check = await uploadToS3(imageInfo, buffer);
-    if(check) {
+    if (check) {
       // return image information to Client
       imageInfo.url = process.env.S3Domain + "/" + imageInfo.url;
-      imageInfo.created_by = req.user;
+      imageInfo.created_by = req.user.userId;
 
       imageStore.create(imageInfo);
       res
         .status(200)
         .send(simpleSuccessResponse(imageInfo, "Successfully uploaded!"));
     } else {
-      res.status(500).send(errorInternalServer("Something went wrong when upload image!"));
+      res
+        .status(500)
+        .send(errorInternalServer("Something went wrong when upload image!"));
     }
   };
 }

@@ -16,9 +16,9 @@ const User = new Schema(
     address: { type: String },
     image: { type: Object },
     role: { type: String },
+    is_active: { type: Boolean },
     created_at: { type: String },
     updated_at: { type: String },
-    is_active: { type: Boolean},
   },
   {
     collection: "users",
